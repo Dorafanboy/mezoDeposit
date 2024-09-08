@@ -73,7 +73,7 @@ async function makeTx(account: PrivateKeyAccount) {
 
     let value = usdtBalance;
 
-    if (usdtBalance > parseUnits(DefiLamaSwapConfig.minUsdtSwapAmount.toString(), 6)) {
+    if (usdtBalance < parseUnits(DefiLamaSwapConfig.minUsdtSwapAmount.toString(), 6)) {
         printInfo(
             `Текущий баланс USDT в Ethereum Chain равен ${formatUnits(usdtBalance, 6)}, что больше чем необходимое число в конфиге ${DefiLamaSwapConfig.minUsdtSwapAmount} (DefiLamaSwapConfig.minUsdtSwapAmount), буду выполнять покупку на DefiLama`,
         );
@@ -141,8 +141,9 @@ async function makeTx(account: PrivateKeyAccount) {
 
         const url = `${mainnet.blockExplorers?.default.url + '/tx/' + approveHash}`;
 
+        // @ts-ignore
         const transaction = await client
-            .waitForTransactionReceipt({ hash: <`0x${string}`>approveHash })
+            .waitForTransactionReceipt({ retryCount: 3, hash: <`0x${string}`>approveHash })
             .then((result) => printSuccess(`Транзакция успешно отправлена. Хэш транзакции: ${url}\n`))
             .catch((e) => {
                 printError(`Произошла ошибка во время выполнения модуля ${mezoModuleName} - ${e}`);
